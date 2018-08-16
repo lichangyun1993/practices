@@ -6,13 +6,12 @@
 	<odl:rpc-service id="practiceService"
 		interface="org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.practice.rev180814.PracticeService" />
 
-	<bean id="practiceConsumer" class="com.utstar.practice.PracticeConsumer"
-		init-method="register" destroy-method="unregister">
+	<bean id="practiceConsumer" class="com.utstar.practice.PracticeConsumer">
 		<argument ref="practiceService" />
 	</bean>
 	
 	<odl:notification-listener ref="practiceConsumer" />
 	
-	<service ref="practiceConsumer" interface="com.utstar.practice.PracticeConsumer"
-          odl:type="default"/>
+	<!-- <service ref="practiceConsumer" interface="com.utstar.practice.PracticeConsumer"
+          odl:type="default"/> -->
 </blueprint>

@@ -7,7 +7,7 @@ This program and the accompanying materials are made available under the
 terms of the Eclipse Public License v1.0 which accompanies this distribution,
 and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
-<features name="odl-study-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+<features name="odl-practice-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/{{VERSION}}/xml/features</repository>
@@ -19,7 +19,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
     <bundle>mvn:com.utstar.practice/practice-api/{{VERSION}}</bundle>
   </feature>
-  <feature name='odl-study' version='${project.version}' description='OpenDaylight :: practice'>
+  <feature name='odl-practice' version='${project.version}' description='OpenDaylight :: practice'>
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${project.version}'>odl-practice-api</feature>
     <bundle>mvn:com.utstar.practice/practice-b/{{VERSION}}</bundle>
@@ -29,7 +29,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version="${project.version}">odl-practice</feature>
     <feature version="${restconf.version}">odl-restconf</feature>
   </feature>
-  <feature name='odl-study-ui' version='${project.version}' description='OpenDaylight :: study :: UI'>
+  <feature name='odl-practice-ui' version='${project.version}' description='OpenDaylight :: practice :: UI'>
     <feature version="${project.version}">odl-practice-rest</feature>
     <feature version="${restconf.version}">odl-mdsal-apidocs</feature>
     <feature version="${dluxapps.version}">odl-dluxapps-yangman</feature>

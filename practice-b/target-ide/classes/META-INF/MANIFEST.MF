@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1534225491375
+Bnd-LastModified: 1534324596827
 Build-Jdk: 1.8.0_181
 Built-By: HZ08908
 Bundle-Description: OpenDaylight is leading the transformation to Open S

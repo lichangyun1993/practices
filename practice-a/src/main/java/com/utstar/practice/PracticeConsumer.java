@@ -9,6 +9,8 @@
 package com.utstar.practice;
 
 
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.practice.rev180814.PracticeService;
+
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.practice.rev180814.GreetMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +18,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.practice
 
 public class PracticeConsumer implements PracticeListener {
     private static final Logger LOG = LoggerFactory.getLogger(PracticeConsumer.class);
+    private PracticeService practiceService;
+
+    public PracticeConsumer(final PracticeService practiceService) {
+        this.practiceService = practiceService;
+    }
 
     @Override
     public void onGreetMessage(GreetMessage notification) {
-        LOG.info("greetMessage" + notification.getMessage());
+        LOG.info("greetMessage:" + notification.getMessage());
     }
 
 }

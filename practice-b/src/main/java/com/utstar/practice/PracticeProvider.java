@@ -8,8 +8,9 @@
 
 package com.utstar.practice;
 
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.practice.rev180814.GreetMessageBuilder;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.practice.rev180814.GreetMessageBuilder;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.practice.rev180814.DataModelBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.practice.rev180814.GreetOutputBuilder;
@@ -34,34 +35,41 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.practice.rev180814.PracticeService;
 
-public class PracticeProvider implements PracticeService, DataTreeChangeListener<DataModel> {
+public class PracticeProvider implements PracticeService, DataTreeChangeListener<DataModel>, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(PracticeProvider.class);
     private static final InstanceIdentifier<DataModel> DATAMODDULE_IID = InstanceIdentifier.builder(DataModel.class)
         .build();
 
     private final DataBroker dataBroker;
     private NotificationPublishService notificationPublishService;
+    private ListenerRegistration<PracticeProvider> registerDataTreeChangeListener;
 
-    public PracticeProvider(final DataBroker dataBroker) {
+    public PracticeProvider(final DataBroker dataBroker, final NotificationPublishService notificationPublishService) {
         this.dataBroker = dataBroker;
-        // 向dataStore注册监听
-        DataTreeIdentifier<DataModel> dataTreeIdentifier =
-            new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, DATAMODDULE_IID);
-        dataBroker.registerDataTreeChangeListener(dataTreeIdentifier, this);
+        this.notificationPublishService = notificationPublishService;
     }
 
     /**
      * Method called when the blueprint container is created.
      */
     public void init() {
-        LOG.info("StudyProvider Session Initiated");
+        LOG.info("PracticeProvider Session Initiated");
+        // 向dataStore注册监听
+        DataTreeIdentifier<DataModel> dataTreeIdentifier =
+            new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, DATAMODDULE_IID);
+        registerDataTreeChangeListener = dataBroker.registerDataTreeChangeListener(dataTreeIdentifier, this);
     }
 
     /**
      * Method called when the blueprint container is destroyed.
      */
+    @Override
     public void close() {
-        LOG.info("StudyProvider Closed");
+        LOG.info("PracticeProvider Closed");
+        if (registerDataTreeChangeListener != null) {
+            registerDataTreeChangeListener.close();
+        }
+
     }
 
     @Override
@@ -72,7 +80,7 @@ public class PracticeProvider implements PracticeService, DataTreeChangeListener
         LOG.info("Put the DataModel operational data into the MD-SAL data store");
         DataModelBuilder dataModelBuilder = new DataModelBuilder().setName(input.getLfInput());
         ReadWriteTransaction wt = dataBroker.newReadWriteTransaction();
-        wt.put(LogicalDatastoreType.OPERATIONAL, DATAMODDULE_IID, dataModelBuilder.build());
+        wt.put(LogicalDatastoreType.CONFIGURATION, DATAMODDULE_IID, dataModelBuilder.build());
         Futures.addCallback(wt.submit(), new FutureCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
@@ -102,7 +110,8 @@ public class PracticeProvider implements PracticeService, DataTreeChangeListener
                             new GreetMessageBuilder().setMessage(rootNode.getDataAfter().getName());
                         notificationPublishService.putNotification(gmb.build());
                     } catch (InterruptedException e) {
-                        LOG.error("Convert data changes to notification publish error");
+                        LOG.error("WRITE:Convert data changes to notification publish error;"
+                            + rootNode.getDataAfter().getName());
                     }
                     break;
                 case SUBTREE_MODIFIED:
@@ -114,21 +123,21 @@ public class PracticeProvider implements PracticeService, DataTreeChangeListener
                             new GreetMessageBuilder().setMessage(rootNode.getDataAfter().getName());
                         notificationPublishService.putNotification(gmb.build());
                     } catch (InterruptedException e) {
-                        LOG.error("Convert data changes to notification publish error");
+                        LOG.error("SUBTREE_MODIFIED:Convert data changes to notification publish error"
+                            + rootNode.getDataAfter().getName());
                     }
                     break;
                 case DELETE:
-                    LOG.info("Delete - before : {} after : {}", rootNode.getDataBefore(), rootNode.getDataAfter());
+                    LOG.info("Delete - before : {} after : {}", rootNode.getDataBefore());
                     // 将数据变化转换为通知发布
                     try {
                         GreetMessageBuilder gmb =
-                            new GreetMessageBuilder().setMessage(rootNode.getDataAfter().getName());
+                            new GreetMessageBuilder().setMessage(rootNode.getDataBefore().getName());
                         notificationPublishService.putNotification(gmb.build());
                     } catch (InterruptedException e) {
-                        LOG.error("Convert data changes to notification publish error");
+                        LOG.error("DELETE:Convert data changes to notification publish error"
+                            + rootNode.getDataAfter().getName());
                     }
-                    break;
-                default:
                     break;
             }
         }
